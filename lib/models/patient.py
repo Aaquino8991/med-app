@@ -1,23 +1,24 @@
 from models.__init__ import CURSOR, CONN
 
-class Doctor():
-    
-    def __init__(self, name, type, phone, email, id=None):
+class Patient:
+
+    def __init__(self, name, sex, address, email, id=None):
         self.id = id
         self.name = name
-        self.type = type
-        self.phone = phone
+        self.sex = sex
+        self.address = address
         self.email = email
 
     @classmethod
     def create_table(cls):
-        """Create new table to persist attributes of Doctor instances"""
+        """Create table to persist attributes of Patient instances"""
         sql = """
-            CREATE TABLE IF NOT EXISTS doctors (
+            CREATE TABLE IF NOT EXISTS patients (
             id INTEGER PRIMARY KEY,
             name TEXT,
-            type TEXT,
-            phone TEXT
+            sex TEXT,
+            address TEXT,
+            email TEXT
             )
         """
         CURSOR.execute(sql)
@@ -27,7 +28,7 @@ class Doctor():
     def drop_table(cls):
         """Delete table"""
         sql = """
-            DROP TABLE IF EXISTS doctors;
+            DROP TABLE IF EXISTS patients;
         """
         CURSOR.execute(sql)
         CONN.commit()
