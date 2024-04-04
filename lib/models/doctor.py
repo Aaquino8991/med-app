@@ -17,7 +17,8 @@ class Doctor():
             id INTEGER PRIMARY KEY,
             name TEXT,
             type TEXT,
-            phone TEXT
+            phone TEXT,
+            email TEXT
             )
         """
         CURSOR.execute(sql)
@@ -31,3 +32,18 @@ class Doctor():
         """
         CURSOR.execute(sql)
         CONN.commit()
+
+    def save(self):
+        """Insert a new row with the values of the corresponding attributes"""
+        CURSOR.execute(
+            """INSERT INTO doctors (name, type, phone, email) 
+               VALUES (?, ?, ?, ?)""",
+            (self.name, self.type, self.phone, self.email)
+        )
+        CONN.commit()
+
+    @classmethod
+    def create(cls, name, type, phone, email):
+        doctor = cls(name, type, phone, email)
+        doctor.save()
+        return doctor
