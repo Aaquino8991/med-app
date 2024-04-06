@@ -163,11 +163,11 @@ class Doctor:
         row = CURSOR.execute(sql, (name,)).fetchone()
         return cls.instance_from_db(row) if row else None
 
-    def employees(self):
-        """Return list of employees associated with current doctor"""
+    def patients(self):
+        """Return list of patients associated with current doctor"""
         from models.patient import Patient
         sql = """
-            SELECT * FROM employees
+            SELECT * FROM patients
             WHERE doctor_id = ?
         """
         CURSOR.execute(sql, (self.id,),)

@@ -97,7 +97,7 @@ class Patient:
     def update(self):
         """Update the table row corresponding to the current Patient instance."""
         sql = """
-            UPDATE employees
+            UPDATE patients
             SET name = ?, email = ?, doctor_id = ?
             WHERE id = ?
         """
