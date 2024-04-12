@@ -11,7 +11,7 @@ class Doctor:
         self.type = type
 
     def __repr__(self):
-        return f"<Doctor {self.id}: {self.name}, {self.type}>"
+        return f"<Doctor {self.id}: {self.name} - {self.type}>"
 
     @property
     def name(self):
@@ -120,6 +120,7 @@ class Doctor:
             # ensure attributes match row values in case local instance was modified
             doctor.name = row[1]
             doctor.type = row[2]
+
         else:
             # not in dictionary, create new instance and add to dictionary
             doctor = cls(row[1], row[2])
@@ -157,11 +158,11 @@ class Doctor:
         sql = """
             SELECT *
             FROM doctors
-            WHERE name is ?
+            WHERE name = ?
         """
 
-        row = CURSOR.execute(sql, (name,)).fetchone()
-        return cls.instance_from_db(row) if row else None
+        rows = CURSOR.execute(sql, (name,)).fetchall()
+        return [cls.instance_from_db(row) for row in rows] if rows else []
 
     def patients(self):
         """Return list of patients associated with current doctor"""
