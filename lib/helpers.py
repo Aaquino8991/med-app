@@ -36,14 +36,19 @@ def create_doctor():
         doctor = Doctor.create(name, type)
         print(f"\nSuccess: Doctor {doctor.name} has been created")
     except Exception as exc:
-        print("Error creating doctor: ", exc)
+        print("\nError creating doctor: ", exc)
 
 def update_doctor():
     doctors = list_doctors()
 
-    index = input("Which doctor do you want to update? (Enter the number in the list): ")
+    index = int(input("""
+Which doctor do you want to update? 
+(Enter the number in the list or 0 to cancel): 
+"""))
     try:
-        index = int(index)
+        if index == 0:
+            print("\nUPDATE CANCELED")
+            return
         if 1 <= index <= len(doctors):
             doctor = doctors[index - 1]
             name = input("Enter the doctor's new name: ")
@@ -53,39 +58,42 @@ def update_doctor():
                 doctor.name = name
                 doctor.type = type_
                 doctor.update()
-                print(f"Success: Doctor {doctor.name} has been updated")
+                print(f"\nSuccess: Doctor {doctor.name} has been updated")
             except Exception as exc:
-                print("Error updating doctor: ", exc)
+                print("\nError updating doctor: ", exc)
         else:
-            print("Invalid index selected.")
+            print("\nInvalid index selected.")
     except ValueError:
-        print("Invalid input. Please enter a number.")
+        print("\n***INVALID INPUT***. Please enter a number.")
 
 def delete_doctor():
     doctors = list_doctors()
 
-    index = int(input("Enter the number in the list or enter 0 to cancel: "))
-    if index == 0:
-        print("Deletion operation canceled")
-        return
-    elif 1 <= index <= len(doctors):
-        doctor = doctors[index - 1]
-        if found_doctor := Doctor.find_by_id(doctor.id):
+    try:
+        index = int(input("\nEnter the number in the list or enter 0 to cancel: "))
+        if index == 0:
+            print("\nDELETION OPERATION CANCELED")
+            return
+        elif 1 <= index <= len(doctors):
+            doctor = doctors[index - 1]
+            found_doctor = Doctor.find_by_id(doctor.id)
             found_doctor.delete()
-            print(f"Doctor {doctor.name} has been deleted")
+            print(f"\nDoctor {doctor.name} has been deleted")
         else:
-            print(f"Doctor not found")
-    else:
-        print(f"Invalid number")
+            print(f"\n***INVALID NUMBER***. Please enter a number in the list.")
+            delete_doctor()
+    except ValueError:
+        print("\n***INVALID INPUT***. Please enter a number in the list.")
+        delete_doctor()
 
 def list_patients_by_doctor():
     doctors = list_doctors()
-    index = input("Enter the number in the list or enter 0 to cancel: ")
-    if index == "0":
-        print("Listing patients by doctor canceled")
-        return
+    
     try:
-        index = int(index)
+        index = int(input("Enter the number in the list or enter 0 to cancel: "))
+        if index == 0:
+            print("OPERATION CANCELED")
+            return
         if 1 <= index <= len(doctors):
             doctor = doctors[index - 1]
             found_doctor = Doctor.find_by_id(doctor.id)
@@ -105,7 +113,9 @@ def list_patients_by_doctor():
         else:
             print("Invalid index.")
     except ValueError:
-        print("Invalid input. Please enter a number or '0' to cancel.")
+        print("""\n***INVALID INPUT*** 
+Please enter a number or '0' to cancel.""")
+        list_patients_by_doctor()
 
 # patient functions
 
@@ -121,48 +131,88 @@ def list_patients():
     return patients    
 
 def find_patient_by_name():
-    name = input("Enter the patient's name: ")
+    name = input("Enter patient's name: ")
     patient = Patient.find_by_name(name)
-    print(patient) if patient else print(
-        f"{Patient} not found"
-        )
-    
+    headers = ["Name", "Age", "Email", "Doctor"]
+    list = []
+    if patient:
+        doctor = Doctor.find_by_id(patient.doctor_id)
+        doctor_name = doctor.name if doctor else "Unknown Doctor"
+        patient_info = (patient.name, patient.age, patient.email, doctor_name)
+        list.append(patient_info)
+        print(tabulate(list, headers=headers, tablefmt="grid"))
+    else:
+        print("Patient not found")
+
 def create_patient():
     name = input("Enter the patient's name: ")
     age = int(input("Enter patient's age: "))
     email = input("Enter the patient's email: ")
-    doctor_id = input("Enter the patient's doctor(id): ")
+
+    doctors = list_doctors()
+    doctor_choices = [str(i + 1) for i in range(len(doctors))]
+    doctor_choice = input("Choose the doctor by entering the corresponding number: ")
+
     try:
-        patient = Patient.create(name, age, email, int(doctor_id))
-        print(f"Success: {patient}")
-    except Exception as exc:
-        print("Error creating patient: ", exc)
+        if doctor_choice in doctor_choices:
+            selected_doctor = doctors[int(doctor_choice) - 1]
+            doctor_id = selected_doctor.id
+            try:
+                patient = Patient.create(name, age, email, doctor_id)
+                print(f"Success: {patient.name} has been created")
+            except Exception as exc:
+                print("Error creating patient: ", exc)
+        else:
+            print("Invalid doctor choice.")
+    except ValueError:
+        print("Invalid input. Please enter a number.")
 
 def update_patient():
-    list_patients()
-    id_ = input("Enter the patient's id: ")
-    if patient := Patient.find_by_id(id_):
-        try:
-            name = input("Enter the patient's new name: ")
-            patient.name = name
-            age = input("Enter patient's new age: ")
-            patient.age = int(age)
-            email = input("Enter the patient's new email: ")
-            patient.email = email
-            doctor_id = input("Enter the patient's new doctor(id): ")
-            patient.doctor_id = int(doctor_id)
+    patients = list_patients()
 
-            patient.update()
-            print(f"Success: {patient.name} has been added as a patient")
-        except Exception as exc:
-            print("Error updating patient: ", exc)
-    else:
-        print(f"Patient {id_} not found")
+    index = int(input("""
+Which patient do you want to update? 
+(Enter the number in the list or 0 to exit): """))
+    
+    try:
+        if index == 0:
+            print("UPDATE CANCELED")
+            return
+        if 1 <= index <= len(patients):
+            patient = patients[index - 1]
+            name = input("Enter the patient's new name: ")
+            age = int(input("Enter the patient's age: "))
+            email = input("Enter the patient's new email: ")
+            
+            try:
+                patient.name = name
+                patient.age = age
+                patient.email = email
+                patient.update()
+                print(f"Success: Patient {patient.name} has been updated")
+            except Exception as exc:
+                print("Error updating patient: ", exc)
+        else:
+            print("Invalid index selected.")
+    except ValueError:
+        print("Invalid input. Please enter a number.")
 
 def delete_patient():
-    id_ = input("Enter patient's id: ")
-    if patient := Patient.find_by_id(id_):
-        patient.delete()
-        print(f"Patient {id_} deleted")
-    else:
-        print(f"Patient {id_} not found")
+    patients = list_patients()
+    
+    try:
+        index = int(input("Which patient would you like to delete: "))
+        if index == 0:
+            print("OPERATION CANCELED")
+            return
+        elif 1 <= index <= len(patients):
+            patient = patients[index - 1]
+            if found_patient := Patient.find_by_id(patient.id):
+                found_patient.delete()
+                print("Patient has been deleted")
+            else:
+                print("Patient not found")
+        else:
+            print("Invalid index entered")
+    except ValueError:
+        print("Invalid input. Please enter a number.")
