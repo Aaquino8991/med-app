@@ -184,18 +184,31 @@ Which patient do you want to update?
             age = int(input("Enter the patient's age: "))
             email = input("Enter the patient's new email: ")
             
-            try:
-                patient.name = name
-                patient.age = age
-                patient.email = email
-                patient.update()
-                print(f"Success: Patient {patient.name} has been updated")
-            except Exception as exc:
-                print("Error updating patient: ", exc)
+            print("\nSelect the new doctor:")
+            doctors = list_doctors()
+
+            doctor_choice = int(input("\nChoose the doctor by entering the corresponding number: "))
+
+            if 1 <= doctor_choice <= len(doctors):
+                selected_doctor = doctors[doctor_choice - 1]
+                doctor_id = selected_doctor.id
+                
+                try:
+                    patient.name = name
+                    patient.age = age
+                    patient.email = email
+                    patient.doctor_id = doctor_id
+                    patient.update()
+                    print(f"Success: Patient {patient.name} has been updated")
+                except Exception as exc:
+                    print("Error updating patient: ", exc)
+            else:
+                print("Invalid doctor choice.")
         else:
             print("Invalid index selected.")
     except ValueError:
         print("Invalid input. Please enter a number.")
+
 
 def delete_patient():
     patients = list_patients()
