@@ -123,9 +123,9 @@ def list_patients():
     patients = Patient.get_all()
     headers = ["Name", "Age", "Email", "Doctor"]
     list = []
-    
     for index, patient in enumerate(patients):
-        patient_info = (index + 1, patient.name, patient.age, patient.email, patient.doctor_id)
+        doctor = Doctor.find_by_id(patient.doctor_id)
+        patient_info = (index + 1, patient.name, patient.age, patient.email, doctor.name)
         list.append(patient_info)
     print(tabulate(list, headers=headers, tablefmt="grid"))
     return patients    
