@@ -1,3 +1,4 @@
+# doctor.py
 from models.__init__ import CURSOR, CONN
 
 class Doctor:
@@ -5,13 +6,13 @@ class Doctor:
     # Dictionary of objects saved to the database.
     all = {}
 
-    def __init__(self, name, type, id=None):
+    def __init__(self, name, practice, id=None):
         self.id = id
         self.name = name
-        self.type = type
+        self.practice = practice
 
     def __repr__(self):
-        return f"<Doctor {self.id}: {self.name} - {self.type}>"
+        return f"<Doctor {self.id}: {self.name} - {self.practice}>"
 
     @property
     def name(self):
@@ -27,16 +28,16 @@ class Doctor:
             )
 
     @property
-    def type(self):
-        return self._type
+    def practice(self):
+        return self._practice
 
-    @type.setter
-    def type(self, type):
-        if isinstance(type, str) and len(type):
-            self._type = type
+    @practice.setter
+    def practice(self, practice):
+        if isinstance(practice, str) and len(practice):
+            self._practice = practice
         else:
             raise ValueError(
-                "Type must be a non-empty string"
+                "Practice must be a non-empty string"
             )
 
     @classmethod
@@ -46,7 +47,7 @@ class Doctor:
             CREATE TABLE IF NOT EXISTS doctors (
             id INTEGER PRIMARY KEY,
             name TEXT,
-            type TEXT)
+            practice TEXT)
         """
         CURSOR.execute(sql)
         CONN.commit()
@@ -61,24 +62,24 @@ class Doctor:
         CONN.commit()
 
     def save(self):
-        """ Insert a new row with the name and type values of the current doctor instance.
+        """ Insert a new row with the name and practice values of the current doctor instance.
         Update object id attribute using the primary key value of new row.
         Save the object in local dictionary using table row's PK as dictionary key"""
         sql = """
-            INSERT INTO doctors (name, type)
+            INSERT INTO doctors (name, practice)
             VALUES (?, ?)
         """
 
-        CURSOR.execute(sql, (self.name, self.type))
+        CURSOR.execute(sql, (self.name, self.practice))
         CONN.commit()
 
         self.id = CURSOR.lastrowid
         type(self).all[self.id] = self
 
     @classmethod
-    def create(cls, name, type):
+    def create(cls, name, practice):
         """ Initialize a new doctor instance and save the object to the database """
-        doctor = cls(name, type)
+        doctor = cls(name, practice)
         doctor.save()
         return doctor
 
@@ -86,10 +87,10 @@ class Doctor:
         """Update the table row corresponding to the current doctor instance."""
         sql = """
             UPDATE doctors
-            SET name = ?, type = ?
+            SET name = ?, practice = ?
             WHERE id = ?
         """
-        CURSOR.execute(sql, (self.name, self.type, self.id))
+        CURSOR.execute(sql, (self.name, self.practice, self.id))
         CONN.commit()
 
     def delete(self):
@@ -119,7 +120,7 @@ class Doctor:
         if doctor:
             # ensure attributes match row values in case local instance was modified
             doctor.name = row[1]
-            doctor.type = row[2]
+            doctor.practice = row[2]
 
         else:
             # not in dictionary, create new instance and add to dictionary

@@ -1,3 +1,4 @@
+# patient.py
 from models.__init__ import CURSOR, CONN
 from models.doctor import Doctor
 
@@ -136,7 +137,7 @@ class Patient:
 
     @classmethod
     def create(cls, name, age, email, doctor_id):
-        """ Initialize a new Patient instance and save the object to the database """
+        """ Initialize a new Patient instance and mapping the object to the database """
         patient = cls(name, age, email, doctor_id)
         patient.save()
         return patient

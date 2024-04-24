@@ -1,6 +1,8 @@
+# helpers.py
 from models.doctor import Doctor
 from models.patient import Patient
 from tabulate import tabulate
+import re
 
 def exit_program():
     print("Thank you for using Med App!")
@@ -14,7 +16,7 @@ def list_doctors():
     list = []
     
     for index, doctor in enumerate(doctors):
-        doctor_info = (index + 1, doctor.name, doctor.type)
+        doctor_info = (index + 1, doctor.name, doctor.practice)
         list.append(doctor_info)
     print(tabulate(list, headers=headers, tablefmt="grid"))
     return doctors    
@@ -25,15 +27,27 @@ def find_doctor_by_name():
     headers = ["Name", "Practice"]
     list = []
     for doctor in doctors:
-        doctor = (doctor.name, doctor.type)
+        doctor = (doctor.name, doctor.practice)
         list.append(doctor)
     print(tabulate(list, headers=headers, tablefmt="grid"))
 
 def create_doctor():
+
     name = input(f"Enter name: ")
-    type = input(f"Enter doctor type: ")
+    practice = input(f"Enter doctor's practice: ")
+
+    pattern = "^[a-zA-Z]+$"
+    
+    if not re.match(pattern, name):
+        print("Error: Name can only contain letters.")
+        return
+    
+    if not re.match(pattern, practice):
+        print("Error: Type can only contain letters.")
+        return
+    
     try:
-        doctor = Doctor.create(name, type)
+        doctor = Doctor.create(name, practice)
         print(f"\nSuccess: Doctor {doctor.name} has been created")
     except Exception as exc:
         print("\nError creating doctor: ", exc)
@@ -52,11 +66,21 @@ Which doctor do you want to update?
         if 1 <= index <= len(doctors):
             doctor = doctors[index - 1]
             name = input("Enter the doctor's new name: ")
-            type_ = input("Enter the doctor's practice: ")
+            practice_ = input("Enter the doctor's practice: ")
+
+            pattern = "^[a-zA-Z]+$"
+
+            if not re.match(pattern, name):
+                print("Name can only be letters")
+                return
+
+            if not re.match(pattern, practice_):
+                print("Practice can only be letters")
+                return
             
             try:
                 doctor.name = name
-                doctor.type = type_
+                doctor.practice = practice_
                 doctor.update()
                 print(f"\nSuccess: Doctor {doctor.name} has been updated")
             except Exception as exc:
