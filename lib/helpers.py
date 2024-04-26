@@ -12,11 +12,11 @@ def exit_program():
 
 def list_doctors():
     doctors = Doctor.get_all()
-    headers = ["Name", "Practice"]
+    headers = ["Name", "Specialty"]
     list = []
     
     for index, doctor in enumerate(doctors):
-        doctor_info = (index + 1, doctor.name, doctor.practice)
+        doctor_info = (index + 1, doctor.name, doctor.specialty)
         list.append(doctor_info)
     print(tabulate(list, headers=headers, tablefmt="grid"))
     return doctors    
@@ -24,63 +24,63 @@ def list_doctors():
 def find_doctor_by_name():
     name = input("Enter doctor's name: ")
     doctors = Doctor.find_by_name(name)
-    headers = ["Name", "Practice"]
+    headers = ["Name", "Specialty"]
     list = []
     for doctor in doctors:
-        doctor = (doctor.name, doctor.practice)
+        doctor = (doctor.name, doctor.specialty)
         list.append(doctor)
     print(tabulate(list, headers=headers, tablefmt="grid"))
 
 def create_doctor():
 
     name = input(f"Enter name: ")
-    practice = input(f"Enter doctor's practice: ")
+    specialty = input(f"Enter doctor's specialty: ")
 
-    pattern = "^[a-zA-Z]+$"
+    pattern = "^[a-zA-Z\s]+$"
     
     if not re.match(pattern, name):
-        print("Error: Name can only contain letters.")
+        print("\nError: Name can only contain letters.")
         return
     
-    if not re.match(pattern, practice):
-        print("Error: Type can only contain letters.")
+    if not re.match(pattern, specialty):
+        print("\nError: Specialty can only contain letters.")
         return
     
     try:
-        doctor = Doctor.create(name, practice)
+        doctor = Doctor.create(name, specialty)
         print(f"\nSuccess: Doctor {doctor.name} has been created")
     except Exception as exc:
         print("\nError creating doctor: ", exc)
 
 def update_doctor():
     doctors = list_doctors()
-
-    index = int(input("""
+    
+    try:
+        index = int(input("""
 Which doctor do you want to update? 
 (Enter the number in the list or 0 to cancel): 
 """))
-    try:
         if index == 0:
             print("\nUPDATE CANCELED")
             return
         if 1 <= index <= len(doctors):
             doctor = doctors[index - 1]
             name = input("Enter the doctor's new name: ")
-            practice_ = input("Enter the doctor's practice: ")
+            specialty_ = input("Enter the doctor's specialty: ")
 
-            pattern = "^[a-zA-Z]+$"
+            pattern = "^[a-zA-Z\s]+$"
 
             if not re.match(pattern, name):
-                print("Name can only be letters")
+                print("Name can only be letters and spaces.")
                 return
 
-            if not re.match(pattern, practice_):
-                print("Practice can only be letters")
+            if not re.match(pattern, specialty_):
+                print("Secialty can only be letters")
                 return
             
             try:
                 doctor.name = name
-                doctor.practice = practice_
+                doctor.specialty = specialty_
                 doctor.update()
                 print(f"\nSuccess: Doctor {doctor.name} has been updated")
             except Exception as exc:
@@ -146,16 +146,30 @@ Please enter a number or '0' to cancel.""")
 def list_patients():
     patients = Patient.get_all()
     headers = ["Name", "Age", "Email", "Doctor"]
-    list = []
+    table_data = []
     for index, patient in enumerate(patients):
-        doctor = Doctor.find_by_id(patient.doctor_id)
-        patient_info = (index + 1, patient.name, patient.age, patient.email, doctor.name)
-        list.append(patient_info)
-    print(tabulate(list, headers=headers, tablefmt="grid"))
-    return patients    
+        if patient.doctor_id is None:
+            doctor_name = "Unknown doctor"
+        else:
+            doctor = Doctor.find_by_id(patient.doctor_id)
+            if doctor:
+                doctor_name = doctor.name
+            else:
+                doctor_name = "Unknown doctor"
+        
+        patient_info = (index + 1, patient.name, patient.age, patient.email, doctor_name)
+        table_data.append(patient_info)
+    print(tabulate(table_data, headers=headers, tablefmt="grid"))
+    return patients
 
 def find_patient_by_name():
     name = input("Enter patient's name: ")
+
+    pattern = "^[a-zA-Z\s]+$"
+
+    if not re.match(pattern, name):
+        print("\nName can only contain letters and spaces.")
+        return
     patient = Patient.find_by_name(name)
     headers = ["Name", "Age", "Email", "Doctor"]
     list = []
@@ -166,10 +180,17 @@ def find_patient_by_name():
         list.append(patient_info)
         print(tabulate(list, headers=headers, tablefmt="grid"))
     else:
-        print("Patient not found")
+        print("\nPatient not found")
 
 def create_patient():
     name = input("Enter the patient's name: ")
+
+    pattern = "^[a-zA-Z\s]+$"
+    
+    if not re.match(pattern, name):
+        print("\nError: Name can only contain letters.")
+        return
+
     age = int(input("Enter patient's age: "))
     email = input("Enter the patient's email: ")
 
@@ -238,7 +259,7 @@ def delete_patient():
     patients = list_patients()
     
     try:
-        index = int(input("Which patient would you like to delete: "))
+        index = int(input("sWhich patient would you like to delete (Enter 0 to cancel): "))
         if index == 0:
             print("OPERATION CANCELED")
             return

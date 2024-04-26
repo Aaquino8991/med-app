@@ -58,15 +58,21 @@ class Patient:
     @property
     def doctor_id(self):
         return self._doctor_id
-
-    @doctor_id.setter
+    
     def doctor_id(self, doctor_id):
-        if type(doctor_id) is int and Doctor.find_by_id(doctor_id):
-            self._doctor_id = doctor_id
+        if doctor_id is None:
+            self._doctor_id = None
+            self._doctor_name = "Unknown doctor"
+        elif isinstance(doctor_id, int):
+            doctor = Doctor.find_by_id(doctor_id)
+            if doctor:
+                self._doctor_id = doctor_id
+                self._doctor_name = doctor.name
+            else:
+                raise ValueError("doctor_id must reference a doctor in the database")
         else:
-            raise ValueError(
-                "doctor_id must reference a doctor in the database")
-
+            raise ValueError("doctor_id must be an integer or None")
+    
     @classmethod
     def create_table(cls):
         """ Create a new table to persist the attributes of Patient instances """
